@@ -5,8 +5,7 @@ export const CONFIG = Object.freeze({
 
     TOTAL_ENTREGAS: 5,
 
-    GASTO_MINIMO: 10,
-    GASTO_MAXIMO: 30,
+    GASTOS_POR_ENTREGA: Object.freeze([10, 20, 30]),
 
     OPCOES_MENU: Object.freeze({
         ENTREGAR: "1",
