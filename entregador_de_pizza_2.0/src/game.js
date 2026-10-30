@@ -43,37 +43,6 @@ export function entregarPizza(estado) {
     };
 }
 
-export function abastecerMoto(estado) {
-    if (!estado.ativo) {
-        return { sucesso: false, mensagem: "A partida terminou." };
-    }
-
-    const anterior = estado.combustivel;
-
-    estado.combustivel = Math.min(
-        anterior + CONFIG.COMBUSTIVEL_POR_ABASTECIMENTO,
-        CONFIG.COMBUSTIVEL_MAXIMO
-    );
-
-    const recuperado = estado.combustivel - anterior;
-
-    if (recuperado === 0) {
-        return {
-            sucesso: false,
-            mensagem: "O depósito já está cheio.",
-            recuperado: 0,
-        };
-    }
-
-    estado.abastecimentos++;
-
-    return {
-        sucesso: true,
-        mensagem: "Moto abastecida!",
-        recuperado,
-    };
-}
-
 export function encerrarPartida(estado) {
     estado.ativo = false;
 
