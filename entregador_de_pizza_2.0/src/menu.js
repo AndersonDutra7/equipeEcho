@@ -2,9 +2,9 @@ import rl from "readline-sync";
 import { CONFIG } from "./config.js";
 import {
     entregarPizza,
-    abastecerMoto,
     encerrarPartida,
 } from "./game.js";
+import { abastecerMoto } from "./fuel.js";
 
 export function mostrarStatus(estado) {
     console.log(`
