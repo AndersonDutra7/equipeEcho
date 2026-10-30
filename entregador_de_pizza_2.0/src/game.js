@@ -1,13 +1,11 @@
 import { CONFIG } from "./config.js";
 
 export function sortearGasto() {
-    const intervalo =
-        CONFIG.GASTO_MAXIMO - CONFIG.GASTO_MINIMO + 1;
+    const gastos = CONFIG.GASTOS_POR_ENTREGA;
 
-    return (
-        Math.floor(Math.random() * intervalo) +
-        CONFIG.GASTO_MINIMO
-    );
+    const indice = Math.floor(Math.random() * gastos.length);
+
+    return gastos[indice];
 }
 
 export function entregarPizza(estado) {
