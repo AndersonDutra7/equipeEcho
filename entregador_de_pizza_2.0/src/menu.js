@@ -6,10 +6,29 @@ import { CONFIG } from "./config.js";
 // ---------------------------------------------------------------------------
 
 /**
- * Apresenta o estado atual da partida e as opções do menu.
+ * Remove espaços desnecessários das extremidades da entrada.
+ * Converte valores não-string de forma segura.
  */
-export function mostrarStatus(estado) {
-    console.log(`
+export function sanitizarEntrada(entrada) {
+    if (entrada === null || entrada === undefined) {
+        return "";
+    }
+    return String(entrada).trim();
+}
+
+/**
+ * Verifica se uma opção fornecida é válida de acordo com as configurações do menu.
+ */
+export function validarOpcao(opcao) {
+    const opcaoLimpa = sanitizarEntrada(opcao);
+    return Object.values(CONFIG.OPCOES_MENU).includes(opcaoLimpa);
+}
+
+/**
+ * Formata o estado atual da partida e as opções do menu para exibição.
+ */
+export function formatarStatus(estado) {
+    return `
 =================================
        ENTREGADOR DE PIZZA
 =================================
@@ -18,48 +37,92 @@ Combustível: ${estado.combustivel}/${CONFIG.COMBUSTIVEL_MAXIMO}
 Combustível gasto: ${estado.combustivelGasto}
 Abastecimentos: ${estado.abastecimentos}
 =================================
-[1] Entregar pizza
-[2] Abastecer moto
-[3] Sair
-=================================`);
+[${CONFIG.OPCOES_MENU.ENTREGAR}] Entregar pizza
+[${CONFIG.OPCOES_MENU.ABASTECER}] Abastecer moto
+[${CONFIG.OPCOES_MENU.SAIR}] Sair
+=================================`;
 }
 
 /**
- * Lê a opção do jogador no terminal.
+ * Apresenta o estado atual da partida e as opções do menu.
  */
-export function lerOpcao() {
-    return rl.question("Opção: ").trim();
+export function mostrarStatus(estado) {
+    console.log(formatarStatus(estado));
+}
+
+/**
+ * Lê a opção do jogador no terminal, removendo espaços desnecessários.
+ * Permite a injeção de uma função de prompt customizada para testes.
+ */
+export function lerOpcao(promptFn) {
+    if (typeof promptFn === "function") {
+        return sanitizarEntrada(promptFn("Opção: "));
+    }
+    return sanitizarEntrada(rl.question("Opção: "));
+}
+
+/**
+ * Formata o resultado de uma ação para apresentação clara ao utilizador.
+ */
+export function formatarResultado(resultado) {
+    if (!resultado) {
+        return "";
+    }
+
+    const linhas = [];
+
+    if (resultado.mensagem) {
+        linhas.push(resultado.mensagem);
+    }
+
+    if (resultado.gasto !== undefined) {
+        if (resultado.sucesso) {
+            linhas.push(`Combustível gasto: ${resultado.gasto}`);
+        } else {
+            linhas.push(`Combustível necessário: ${resultado.gasto}`);
+        }
+    }
+
+    if (resultado.recuperado !== undefined && resultado.sucesso) {
+        linhas.push(`Combustível recuperado: ${resultado.recuperado}`);
+    }
+
+    return linhas.join("\n");
 }
 
 /**
  * Apresenta o resultado de uma ação (entrega, abastecimento, etc.).
  */
 export function apresentarResultado(resultado) {
-    console.log(`\n${resultado.mensagem}`);
+    const texto = formatarResultado(resultado);
+    if (texto) {
+        console.log(`\n${texto}`);
+    }
+}
 
-    if (resultado.gasto !== undefined) {
-        console.log(`Combustível gasto: ${resultado.gasto}`);
+/**
+ * Formata o resumo final da partida.
+ */
+export function formatarResumo(estado) {
+    const linhas = [
+        "========== RESUMO FINAL ==========",
+        `Entregas: ${estado.entregasRealizadas}/${CONFIG.TOTAL_ENTREGAS}`,
+        `Combustível gasto: ${estado.combustivelGasto}`,
+        `Abastecimentos: ${estado.abastecimentos}`,
+    ];
+
+    if (estado.resultado === "vitoria") {
+        linhas.push("Parabéns! Concluíste todas as entregas!");
+    } else {
+        linhas.push("Partida terminada sem concluir o objetivo.");
     }
 
-    if (resultado.recuperado !== undefined && resultado.sucesso) {
-        console.log(`Combustível recuperado: ${resultado.recuperado}`);
-    }
+    return linhas.join("\n");
 }
 
 /**
  * Apresenta o resumo final da partida.
  */
 export function mostrarResumo(estado) {
-    console.log("\n========== RESUMO FINAL ==========");
-    console.log(
-        `Entregas: ${estado.entregasRealizadas}/${CONFIG.TOTAL_ENTREGAS}`
-    );
-    console.log(`Combustível gasto: ${estado.combustivelGasto}`);
-    console.log(`Abastecimentos: ${estado.abastecimentos}`);
-
-    if (estado.resultado === "vitoria") {
-        console.log("Parabéns! Concluíste todas as entregas!");
-    } else {
-        console.log("Partida terminada sem concluir o objetivo.");
-    }
+    console.log(`\n${formatarResumo(estado)}`);
 }
