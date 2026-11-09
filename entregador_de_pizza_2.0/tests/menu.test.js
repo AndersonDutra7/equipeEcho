@@ -11,6 +11,10 @@ import {
     apresentarResultado,
     formatarResumo,
     mostrarResumo,
+    formatarMenuFinal,
+    mostrarMenuFinal,
+    solicitarConfirmacaoReiniciar,
+    perguntarReiniciar,
 } from "../src/menu.js";
 import { criarEstadoInicial } from "../src/gameState.js";
 import { CONFIG } from "../src/config.js";
@@ -238,3 +242,113 @@ test("mostrarResumo exibe o resumo no console sem erros", () => {
         console.log = logOriginal;
     }
 });
+
+// ---------------------------------------------------------------------------
+// 6. Menu final e confirmação de reinício
+// ---------------------------------------------------------------------------
+
+test("formatarMenuFinal apresenta as opções configuradas de jogar novamente e sair", () => {
+    const texto = formatarMenuFinal();
+
+    assert.ok(texto.includes("MENU FINAL"));
+    assert.ok(texto.includes(`[${CONFIG.OPCOES_MENU_FINAL.REINICIAR}] Jogar novamente`));
+    assert.ok(texto.includes(`[${CONFIG.OPCOES_MENU_FINAL.SAIR}] Sair`));
+});
+
+test("mostrarMenuFinal exibe o menu final no console sem erros", () => {
+    const logs = [];
+    const logOriginal = console.log;
+    try {
+        console.log = (msg) => logs.push(msg);
+        mostrarMenuFinal();
+        assert.equal(logs.length, 1);
+        assert.ok(logs[0].includes("MENU FINAL"));
+    } finally {
+        console.log = logOriginal;
+    }
+});
+
+test("solicitarConfirmacaoReiniciar aceita a opção 1 para reiniciar", () => {
+    const mockLeitor = () => "1";
+    const logOriginal = console.log;
+    try {
+        console.log = () => {};
+        assert.equal(solicitarConfirmacaoReiniciar(mockLeitor), true);
+    } finally {
+        console.log = logOriginal;
+    }
+});
+
+test("solicitarConfirmacaoReiniciar aceita respostas afirmativas ('s', 'sim', 'y', 'yes')", () => {
+    const afirmativas = ["s", "  s  ", "S", "sim", "SIM", "y", "yes"];
+    const logOriginal = console.log;
+    try {
+        console.log = () => {};
+        for (const resposta of afirmativas) {
+            const mockLeitor = () => resposta;
+            assert.equal(solicitarConfirmacaoReiniciar(mockLeitor), true);
+        }
+    } finally {
+        console.log = logOriginal;
+    }
+});
+
+test("solicitarConfirmacaoReiniciar aceita a opção 2 para sair sem reiniciar", () => {
+    const mockLeitor = () => "2";
+    const logOriginal = console.log;
+    try {
+        console.log = () => {};
+        assert.equal(solicitarConfirmacaoReiniciar(mockLeitor), false);
+    } finally {
+        console.log = logOriginal;
+    }
+});
+
+test("solicitarConfirmacaoReiniciar aceita respostas negativas ('n', 'nao', 'não', 'no')", () => {
+    const negativas = ["n", "  n  ", "N", "nao", "NAO", "não", "NÃO", "no"];
+    const logOriginal = console.log;
+    try {
+        console.log = () => {};
+        for (const resposta of negativas) {
+            const mockLeitor = () => resposta;
+            assert.equal(solicitarConfirmacaoReiniciar(mockLeitor), false);
+        }
+    } finally {
+        console.log = logOriginal;
+    }
+});
+
+test("solicitarConfirmacaoReiniciar encerra com false para entradas vazias, nulas ou indefinidas", () => {
+    const vazias = ["", "   ", null, undefined];
+    const logOriginal = console.log;
+    try {
+        console.log = () => {};
+        for (const resposta of vazias) {
+            const mockLeitor = () => resposta;
+            assert.equal(solicitarConfirmacaoReiniciar(mockLeitor), false);
+        }
+    } finally {
+        console.log = logOriginal;
+    }
+});
+
+test("solicitarConfirmacaoReiniciar repete prompt após opções inválidas até receber opção válida", () => {
+    const entradas = ["invalido", "xyz", "9", "1"];
+    let indice = 0;
+    const mockLeitor = () => entradas[indice++];
+
+    const logOriginal = console.log;
+    try {
+        console.log = () => {};
+        const resultado = solicitarConfirmacaoReiniciar(mockLeitor);
+        assert.equal(resultado, true);
+        assert.equal(indice, 4);
+    } finally {
+        console.log = logOriginal;
+    }
+});
+
+test("perguntarReiniciar é um alias de solicitarConfirmacaoReiniciar", () => {
+    assert.equal(perguntarReiniciar, solicitarConfirmacaoReiniciar);
+});
+

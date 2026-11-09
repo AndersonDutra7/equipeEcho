@@ -40,13 +40,15 @@ O objetivo principal é concluir todas as cinco entregas antes de o jogador deci
 - Não é possível realizar entregas depois de concluir o objetivo.
 - O contador de entregas não pode ser negativo nem ultrapassar cinco.
 
-## 4. Condições de vitória e saída
+## 4. Condições de vitória, saída e reinício
 
 ### Vitória
 
 A partida termina com vitória quando o jogador conclui cinco entregas válidas.
 
 O jogo deve apresentar uma mensagem de sucesso e um resumo final da partida.
+
+Após a apresentação do resumo, o jogador tem a opção de iniciar uma nova partida através do menu final ou de confirmação, sem necessidade de reiniciar manualmente o programa.
 
 ### Saída antecipada
 
@@ -60,6 +62,15 @@ A falta de combustível não termina automaticamente a partida, porque o jogador
 
 A tentativa de entrega deve ser recusada e o jogador deve poder escolher outra ação.
 
+### Reinício de partida
+
+Ao reiniciar a partida:
+- O combustível inicial é reposto no valor configurado (100 unidades).
+- O contador de entregas e as estatísticas (combustível gasto, abastecimentos, saldo) são completamente zerados.
+- O estado de encerramento é limpo (`ativo: true`, `resultado: "em_andamento"`).
+- Nenhuma estatística ou dado da partida anterior é preservado indevidamente.
+- É possível sair do jogo sem reiniciar através da opção de saída no menu final.
+
 ## 5. Menu do jogo
 
 O menu principal disponibiliza as seguintes opções:
@@ -71,6 +82,13 @@ O menu principal disponibiliza as seguintes opções:
 Entradas inválidas devem apresentar uma mensagem de erro sem encerrar inesperadamente o programa.
 
 Depois de cada ação, o menu deve apresentar o estado atualizado da partida enquanto o jogo estiver ativo.
+
+### Menu final
+
+Após o término da partida, o menu final disponibiliza as seguintes opções:
+
+1. Jogar novamente (redefine a partida com o estado inicial correto).
+2. Sair (encerra o jogo sem reiniciar).
 
 ## 6. Estado da partida
 
@@ -119,8 +137,8 @@ package.json
 - Centralizar o combustível inicial, a capacidade máxima, o consumo possível e o total de entregas.
 
 **`game.js`**
-- Inicializar e coordenar a partida.
-- Controlar o estado ativo e as condições de vitória e saída.
+- Inicializar, coordenar e reiniciar a partida.
+- Controlar o estado ativo e as condições de vitória, saída e reinício.
 - Coordenar as operações dos restantes módulos.
 
 **`deliveries.js`**
@@ -139,8 +157,9 @@ package.json
 - Disponibilizar os dados para o resumo final.
 
 **`menu.js`**
-- Apresentar as opções disponíveis.
+- Apresentar as opções disponíveis (menu principal e menu final).
 - Ler e validar a entrada do utilizador.
+- Solicitar confirmação ou opção para reiniciar a partida.
 - Apresentar mensagens e resultados das operações.
 
 **`tests/`**

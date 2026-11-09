@@ -1,7 +1,12 @@
 import test, { describe } from "node:test";
 import assert from "node:assert/strict";
 
-import { processarAcao, encerrarPartida, iniciarPartida } from "../src/game.js";
+import {
+    processarAcao,
+    encerrarPartida,
+    iniciarPartida,
+    reiniciarPartida,
+} from "../src/game.js";
 import { criarEstadoInicial } from "../src/gameState.js";
 import { CONFIG } from "../src/config.js";
 
@@ -217,6 +222,161 @@ describe("Testes do Fluxo de Jogo e Condições de Encerramento", () => {
             } finally {
                 console.log = originalLog;
             }
+        });
+    });
+
+    // Tarefa 5: Reiniciar partida (Issue #8)
+    describe("Reiniciar partida", () => {
+        test("reiniciarPartida repõe combustível inicial", () => {
+            const estado = criarEstadoInicial();
+            estado.combustivel = 20;
+
+            reiniciarPartida(estado);
+
+            assert.equal(estado.combustivel, CONFIG.COMBUSTIVEL_INICIAL);
+        });
+
+        test("reiniciarPartida repõe contador de entregas e estatísticas", () => {
+            const estado = criarEstadoInicial();
+            estado.entregasRealizadas = 5;
+            estado.combustivelGasto = 80;
+            estado.abastecimentos = 2;
+            estado.dinheiro = 150;
+
+            reiniciarPartida(estado);
+
+            assert.equal(estado.entregasRealizadas, 0);
+            assert.equal(estado.combustivelGasto, 0);
+            assert.equal(estado.abastecimentos, 0);
+            assert.equal(estado.dinheiro, 0);
+        });
+
+        test("reiniciarPartida limpa o estado de encerramento após vitória", () => {
+            const estado = criarEstadoInicial();
+            estado.ativo = false;
+            estado.resultado = "vitoria";
+
+            reiniciarPartida(estado);
+
+            assert.equal(estado.ativo, true);
+            assert.equal(estado.resultado, "em_andamento");
+        });
+
+        test("reiniciarPartida limpa o estado de encerramento após desistência", () => {
+            const estado = criarEstadoInicial();
+            estado.ativo = false;
+            estado.resultado = "desistencia";
+
+            reiniciarPartida(estado);
+
+            assert.equal(estado.ativo, true);
+            assert.equal(estado.resultado, "em_andamento");
+        });
+
+        test("critério de aceitação: nenhuma estatística da partida anterior é preservada indevidamente", () => {
+            const estado = criarEstadoInicial();
+            estado.entregasRealizadas = 4;
+            estado.combustivelGasto = 70;
+            estado.abastecimentos = 3;
+            estado.dinheiro = 95.5;
+            estado.propriedadeAntiga = "lixo";
+
+            reiniciarPartida(estado);
+
+            assert.equal(estado.entregasRealizadas, 0);
+            assert.equal(estado.combustivelGasto, 0);
+            assert.equal(estado.abastecimentos, 0);
+            assert.equal(estado.dinheiro, 0);
+            assert.equal(estado.combustivel, CONFIG.COMBUSTIVEL_INICIAL);
+            assert.equal("propriedadeAntiga" in estado, false);
+        });
+
+        test("reiniciarPartida devolve um novo estado inicial correto se chamado sem argumentos", () => {
+            const novo = reiniciarPartida();
+
+            assert.equal(novo.combustivel, CONFIG.COMBUSTIVEL_INICIAL);
+            assert.equal(novo.entregasRealizadas, 0);
+            assert.equal(novo.dinheiro, 0);
+            assert.equal(novo.combustivelGasto, 0);
+            assert.equal(novo.abastecimentos, 0);
+            assert.equal(novo.ativo, true);
+            assert.equal(novo.resultado, "em_andamento");
+        });
+
+        test("critério de aceitação: a nova partida começa com o estado inicial correto em iniciarPartida", () => {
+            comRandomMockado(0.0, () => {
+                // Partida 1: 5 entregas ("1") para vencer
+                // Menu final: "1" para jogar novamente
+                // Partida 2: 2 entregas ("1"), depois sair ("3")
+                const entradas = [
+                    "1", "1", "1", "1", "1", // Vitória na partida 1
+                    "1",                     // Reiniciar no menu final
+                    "1", "1",                // 2 entregas na partida 2
+                    "3",                     // Sair na partida 2
+                ];
+                let indice = 0;
+                const mockLeitor = () => entradas[indice++];
+
+                const logOriginal = console.log;
+                try {
+                    console.log = () => {};
+                    const estadoFinal = iniciarPartida(mockLeitor);
+
+                    // A partida 2 terminou com 2 entregas (não 7 acumuladas)
+                    assert.equal(estadoFinal.entregasRealizadas, 2);
+                    assert.equal(estadoFinal.resultado, "desistencia");
+                    assert.equal(estadoFinal.ativo, false);
+                    assert.equal(indice, entradas.length);
+                } finally {
+                    console.log = logOriginal;
+                }
+            });
+        });
+
+        test("critério de aceitação: é possível sair sem reiniciar no menu final", () => {
+            comRandomMockado(0.0, () => {
+                // 5 entregas seguidas para vencer, e depois "2" para sair no menu final
+                const entradas = ["1", "1", "1", "1", "1", "2"];
+                let indice = 0;
+                const mockLeitor = () => entradas[indice++];
+
+                const logOriginal = console.log;
+                try {
+                    console.log = () => {};
+                    const estadoFinal = iniciarPartida(mockLeitor);
+
+                    assert.equal(estadoFinal.resultado, "vitoria");
+                    assert.equal(estadoFinal.ativo, false);
+                    assert.equal(estadoFinal.entregasRealizadas, CONFIG.TOTAL_ENTREGAS);
+                    assert.equal(indice, 6);
+                } finally {
+                    console.log = logOriginal;
+                }
+            });
+        });
+
+        test("iniciarPartida aceita confirmação afirmativa 'sim' no menu final para reiniciar", () => {
+            comRandomMockado(0.0, () => {
+                const entradas = [
+                    "1", "1", "1", "1", "1", // 5 entregas -> vitória
+                    "sim",                   // Confirma reinício via texto afirmativo
+                    "3",                     // Sai imediatamente na nova partida
+                ];
+                let indice = 0;
+                const mockLeitor = () => entradas[indice++];
+
+                const logOriginal = console.log;
+                try {
+                    console.log = () => {};
+                    const estadoFinal = iniciarPartida(mockLeitor);
+
+                    assert.equal(estadoFinal.entregasRealizadas, 0);
+                    assert.equal(estadoFinal.resultado, "desistencia");
+                    assert.equal(indice, 7);
+                } finally {
+                    console.log = logOriginal;
+                }
+            });
         });
     });
 });

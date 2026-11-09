@@ -118,6 +118,73 @@ ${texto}`);
     }
 }
 
+/**
+ * Formata o menu final com as opções disponíveis após o término da partida.
+ */
+export function formatarMenuFinal() {
+    return `
+=================================
+          MENU FINAL
+=================================
+[${CONFIG.OPCOES_MENU_FINAL.REINICIAR}] Jogar novamente
+[${CONFIG.OPCOES_MENU_FINAL.SAIR}] Sair
+=================================`;
+}
+
+/**
+ * Apresenta o menu final no console.
+ */
+export function mostrarMenuFinal() {
+    console.log(formatarMenuFinal());
+}
+
+/**
+ * Solicita ao jogador a confirmação ou a opção no menu final para reiniciar a partida.
+ * Aceita as opções numéricas configuradas ("1" para reiniciar, "2" para sair)
+ * bem como respostas afirmativas ("s", "sim", "y", "yes") ou negativas ("n", "nao", "não", "no").
+ *
+ * Retorna true para reiniciar a partida ou false para encerrar.
+ *
+ * @param {Function} [leitor=lerOpcao] Função de leitura customizada para testes.
+ * @returns {boolean}
+ */
+export function solicitarConfirmacaoReiniciar(leitor = lerOpcao) {
+    while (true) {
+        mostrarMenuFinal();
+        const entrada = typeof leitor === "function" ? leitor() : "";
+        const opcao = sanitizarEntrada(entrada).toLowerCase();
+
+        // Encerramento seguro para EOF ou entradas vazias (null, undefined, string vazia ou apenas espaços)
+        if (!opcao) {
+            return false;
+        }
+
+        if (
+            opcao === CONFIG.OPCOES_MENU_FINAL.REINICIAR ||
+            opcao === "s" ||
+            opcao === "sim" ||
+            opcao === "y" ||
+            opcao === "yes"
+        ) {
+            return true;
+        }
+
+        if (
+            opcao === CONFIG.OPCOES_MENU_FINAL.SAIR ||
+            opcao === "n" ||
+            opcao === "nao" ||
+            opcao === "não" ||
+            opcao === "no"
+        ) {
+            return false;
+        }
+
+        console.log("\nOpção inválida. Escolhe 1 (Jogar novamente) ou 2 (Sair).");
+    }
+}
+
+export const perguntarReiniciar = solicitarConfirmacaoReiniciar;
+
 export {
     obterEstatisticas,
     calcularEstatisticas,
