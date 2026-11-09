@@ -5,6 +5,9 @@ export const CONFIG = Object.freeze({
 
     TOTAL_ENTREGAS: 5,
 
+    RECOMPENSA_MINIMA: 20,
+    RECOMPENSA_MAXIMA: 50,
+
     GASTOS_POR_ENTREGA: Object.freeze([10, 20, 30]),
 
     OPCOES_MENU: Object.freeze({

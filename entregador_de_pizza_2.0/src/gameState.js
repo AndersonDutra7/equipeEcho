@@ -4,6 +4,7 @@ export function criarEstadoInicial() {
     return {
         combustivel: CONFIG.COMBUSTIVEL_INICIAL,
         entregasRealizadas: 0,
+        dinheiro: 0,
         combustivelGasto: 0,
         abastecimentos: 0,
         ativo: true,
