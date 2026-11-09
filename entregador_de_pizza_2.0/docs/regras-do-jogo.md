@@ -175,7 +175,7 @@ O jogo possui um saldo em reais, iniciado em R$ 0,00.
 ### Bónus de conclusão
 Não há bónus adicional por concluir as cinco entregas nesta implementação, pois essa regra depende de aprovação específica da equipa.
 
-A recompensa não altera as condições fundamentais de vitória. O saldo recebido pelas entregas pode ser utilizado para pagar os abastecimentos, ao custo de R$ 1,00 por unidade de combustível.
+A recompensa não altera as condições fundamentais de vitória. O abastecimento continua seguindo a regra já documentada, sem custo em dinheiro.
 
 ## 10. Critérios de qualidade
 
