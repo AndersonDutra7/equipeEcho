@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { processarAcao, encerrarPartida } from "../src/game.js";
+import { processarAcao, encerrarPartida, iniciarPartida } from "../src/game.js";
 import { criarEstadoInicial } from "../src/gameState.js";
 import { CONFIG } from "../src/config.js";
 
@@ -168,3 +168,70 @@ test("múltiplas partidas independentes não interferem entre si", () => {
         Math.random = original;
     }
 });
+
+// ---------------------------------------------------------------------------
+// Validação e tratamento de espaços e entradas inválidas no fluxo
+// ---------------------------------------------------------------------------
+
+test("opções válidas com espaços desnecessários acionam a ação correta", () => {
+    const original = Math.random;
+
+    try {
+        Math.random = () => 0; // Gasto 10
+        const estado = criarEstadoInicial();
+
+        // Testar entrega com espaços
+        const resultadoEntrega = processarAcao(estado, "   1   ");
+        assert.equal(resultadoEntrega.sucesso, true);
+        assert.equal(estado.entregasRealizadas, 1);
+        assert.equal(estado.combustivel, 90);
+
+        // Testar abastecimento com espaços
+        const resultadoAbastecer = processarAcao(estado, "  2  ");
+        assert.equal(resultadoAbastecer.sucesso, true);
+        assert.equal(estado.combustivel, 100);
+        assert.equal(estado.abastecimentos, 1);
+
+        // Testar sair com espaços
+        const resultadoSair = processarAcao(estado, " \t 3 \n ");
+        assert.equal(resultadoSair.sucesso, true);
+        assert.equal(estado.ativo, false);
+        assert.equal(estado.resultado, "desistencia");
+    } finally {
+        Math.random = original;
+    }
+});
+
+test("entradas inválidas não encerram a partida nem alteram o estado", () => {
+    const estado = criarEstadoInicial();
+    const entradasInvalidas = ["", "   ", "xyz", "0", "4", "99", null, undefined];
+
+    for (const entrada of entradasInvalidas) {
+        const resultado = processarAcao(estado, entrada);
+        assert.equal(resultado.sucesso, false);
+        assert.equal(resultado.mensagem, "Opção inválida. Escolhe 1, 2 ou 3.");
+        assert.equal(estado.ativo, true);
+        assert.equal(estado.entregasRealizadas, 0);
+        assert.equal(estado.combustivel, 100);
+    }
+});
+
+test("iniciarPartida continua em execução após entradas inválidas e só encerra ao solicitar", () => {
+    const entradas = ["invalido1", "   ", "99", "3"];
+    let indice = 0;
+    const mockLeitor = () => entradas[indice++];
+
+    // Redirecionar console.log para não poluir os logs de teste
+    const originalLog = console.log;
+    try {
+        console.log = () => {};
+        const estadoFinal = iniciarPartida(mockLeitor);
+
+        assert.equal(estadoFinal.ativo, false);
+        assert.equal(estadoFinal.resultado, "desistencia");
+        assert.equal(indice, 4); // Garante que passou pelas 3 inválidas e parou na 4ª (sair)
+    } finally {
+        console.log = originalLog;
+    }
+});
+

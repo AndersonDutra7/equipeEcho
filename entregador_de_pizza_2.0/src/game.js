@@ -2,7 +2,13 @@ import { CONFIG } from "./config.js";
 import { criarEstadoInicial } from "./gameState.js";
 import { entregarPizza } from "./deliveries.js";
 import { abastecerMoto } from "./fuel.js";
-import { mostrarStatus, lerOpcao, apresentarResultado, mostrarResumo } from "./menu.js";
+import {
+    mostrarStatus,
+    lerOpcao,
+    apresentarResultado,
+    mostrarResumo,
+    sanitizarEntrada,
+} from "./menu.js";
 
 // ---------------------------------------------------------------------------
 // Coordenação do fluxo da partida
@@ -33,17 +39,20 @@ export function encerrarPartida(estado) {
 
 /**
  * Processa uma ação escolhida pelo jogador.
- * Retorna o resultado da operação para apresentação, ou null para
- * opções inválidas (tratadas internamente).
+ * Retorna o resultado da operação para apresentação, ou null se a partida
+ * já estiver encerrada.
  *
- * Não executa nenhuma ação se a partida já não estiver ativa.
+ * Remove espaços desnecessários da opção e trata opções inválidas de forma
+ * segura, sem encerrar o programa e sem alterar o estado.
  */
 export function processarAcao(estado, opcao) {
     if (!estado.ativo) {
         return null;
     }
 
-    switch (opcao) {
+    const opcaoTratada = sanitizarEntrada(opcao);
+
+    switch (opcaoTratada) {
         case CONFIG.OPCOES_MENU.ENTREGAR: {
             const resultado = entregarPizza(estado);
             verificarVitoria(estado);
@@ -58,7 +67,10 @@ export function processarAcao(estado, opcao) {
             return { sucesso: true, mensagem: "Jogo encerrado." };
 
         default:
-            return { sucesso: false, mensagem: "Opção inválida. Escolhe 1, 2 ou 3." };
+            return {
+                sucesso: false,
+                mensagem: "Opção inválida. Escolhe 1, 2 ou 3.",
+            };
     }
 }
 
@@ -68,14 +80,16 @@ export function processarAcao(estado, opcao) {
  *
  * O fluxo inteiro é controlado por esta função — nenhuma variável global
  * dispersa é necessária.
+ *
+ * Permite a injeção de uma função de leitura para testes automatizados.
  */
-export function iniciarPartida() {
+export function iniciarPartida(leitor = lerOpcao) {
     const estado = criarEstadoInicial();
 
     while (estado.ativo) {
         mostrarStatus(estado);
 
-        const opcao = lerOpcao();
+        const opcao = leitor();
         const resultado = processarAcao(estado, opcao);
 
         if (resultado) {
@@ -84,4 +98,5 @@ export function iniciarPartida() {
     }
 
     mostrarResumo(estado);
+    return estado;
 }
