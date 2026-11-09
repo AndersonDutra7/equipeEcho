@@ -100,29 +100,9 @@ export function apresentarResultado(resultado) {
     }
 }
 
-/**
- * Formata o resumo final da partida.
- */
-export function formatarResumo(estado) {
-    const linhas = [
-        "========== RESUMO FINAL ==========",
-        `Entregas: ${estado.entregasRealizadas}/${CONFIG.TOTAL_ENTREGAS}`,
-        `Combustível gasto: ${estado.combustivelGasto}`,
-        `Abastecimentos: ${estado.abastecimentos}`,
-    ];
-
-    if (estado.resultado === "vitoria") {
-        linhas.push("Parabéns! Concluíste todas as entregas!");
-    } else {
-        linhas.push("Partida terminada sem concluir o objetivo.");
-    }
-
-    return linhas.join("\n");
-}
-
-/**
- * Apresenta o resumo final da partida.
- */
-export function mostrarResumo(estado) {
-    console.log(`\n${formatarResumo(estado)}`);
-}
+export {
+    obterEstatisticas,
+    calcularEstatisticas,
+    formatarResumo,
+    mostrarResumo,
+} from "./statistics.js";

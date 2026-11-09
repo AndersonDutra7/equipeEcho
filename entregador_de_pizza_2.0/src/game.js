@@ -6,9 +6,9 @@ import {
     mostrarStatus,
     lerOpcao,
     apresentarResultado,
-    mostrarResumo,
     sanitizarEntrada,
 } from "./menu.js";
+import { mostrarResumo } from "./statistics.js";
 
 // ---------------------------------------------------------------------------
 // Coordenação do fluxo da partida
