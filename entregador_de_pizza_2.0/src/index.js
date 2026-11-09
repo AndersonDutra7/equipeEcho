@@ -1,6 +1,3 @@
-import { criarEstadoInicial } from "./gameState.js";
-import { executarMenu } from "./menu.js";
+import { iniciarPartida } from "./game.js";
 
-const estado = criarEstadoInicial();
-
-executarMenu(estado);
+iniciarPartida();

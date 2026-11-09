@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { entregarPizza, sortearGasto } from "../src/game.js";
+import { entregarPizza, sortearGasto } from "../src/deliveries.js";
 import { criarEstadoInicial } from "../src/gameState.js";
 
 test("sorteia somente gastos de 10, 20 ou 30", () => {
