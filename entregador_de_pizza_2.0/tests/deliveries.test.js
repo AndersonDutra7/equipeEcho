@@ -1,6 +1,6 @@
 import test, { describe } from "node:test";
 import assert from "node:assert/strict";
-import { entregarPizza, sortearGasto } from "../src/deliveries.js";
+import { entregarPizza, sortearGasto, sortearRecompensa } from "../src/deliveries.js";
 import { criarEstadoInicial } from "../src/gameState.js";
 import { CONFIG } from "../src/config.js";
 
@@ -32,6 +32,51 @@ describe("Testes das Regras de Entrega e Consumo de Combustível", () => {
                     assert.equal(sortearGasto(), esperado);
                 });
             }
+        });
+    });
+
+
+    describe("Recompensas por entrega", () => {
+        test("sorteia recompensas dentro do intervalo documentado de R$ 20 a R$ 50", () => {
+            comRandomMockado(0, () => assert.equal(sortearRecompensa(), 20));
+            comRandomMockado(0.999999, () => assert.equal(sortearRecompensa(), 50));
+        });
+
+        test("adiciona a recompensa ao saldo somente após entrega bem-sucedida", () => {
+            const estado = criarEstadoInicial();
+            comRandomMockado(0, () => {
+                const resultado = entregarPizza(estado);
+                assert.equal(resultado.sucesso, true);
+                assert.equal(resultado.recompensa, 20);
+                assert.equal(resultado.saldo, 20);
+                assert.equal(estado.dinheiro, 20);
+            });
+        });
+
+        test("não concede recompensa nem altera o saldo quando falta combustível", () => {
+            const estado = criarEstadoInicial();
+            estado.combustivel = 5;
+            estado.dinheiro = 35;
+            comRandomMockado(0, () => {
+                const resultado = entregarPizza(estado);
+                assert.equal(resultado.sucesso, false);
+                assert.equal(resultado.recompensa, undefined);
+                assert.equal(estado.dinheiro, 35);
+                assert.equal(estado.entregasRealizadas, 0);
+            });
+        });
+
+        test("não concede recompensa quando a partida terminou ou a meta foi atingida", () => {
+            const encerrado = criarEstadoInicial();
+            encerrado.ativo = false;
+            const saldoInicial = encerrado.dinheiro;
+            assert.equal(entregarPizza(encerrado).sucesso, false);
+            assert.equal(encerrado.dinheiro, saldoInicial);
+
+            const concluido = criarEstadoInicial();
+            concluido.entregasRealizadas = CONFIG.TOTAL_ENTREGAS;
+            assert.equal(entregarPizza(concluido).sucesso, false);
+            assert.equal(concluido.dinheiro, 0);
         });
     });
 

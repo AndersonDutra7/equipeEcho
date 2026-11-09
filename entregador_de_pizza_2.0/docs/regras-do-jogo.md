@@ -17,16 +17,20 @@ O objetivo principal é concluir todas as cinco entregas antes de o jogador deci
 - Cada tentativa de entrega gera um consumo aleatório de 10, 20 ou 30 unidades.
 - O consumo só é aplicado quando existe combustível suficiente para realizar a entrega.
 - Se o combustível disponível for inferior ao consumo sorteado, a entrega falha e o estado da partida não é alterado.
-- Cada abastecimento recupera 20 unidades de combustível.
+- Cada abastecimento pode recuperar até 20 unidades de combustível.
 - O combustível nunca pode ultrapassar 100 unidades.
 - Se faltarem menos de 20 unidades para encher o depósito, o abastecimento recupera apenas a quantidade necessária para atingir 100.
-- Abastecer com o depósito cheio não altera o combustível.
+- Abastecer com o depósito cheio não altera o estado nem cobra qualquer valor.
 
 ### Economia do abastecimento
 
-Na versão inicial, o abastecimento é gratuito, mantendo o comportamento do código original.
-
-A introdução de dinheiro e de custos de abastecimento fica pendente de aprovação da equipa e será considerada uma melhoria opcional.
+- Cada unidade de combustível custa **R$ 1,00**.
+- O custo é calculado pela quantidade efetivamente recebida, e não pela capacidade total do abastecimento.
+- Um abastecimento completo de 20 unidades custa R$ 20,00.
+- O abastecimento parcial cobra somente as unidades necessárias para completar o depósito (por exemplo, 5 unidades custam R$ 5,00).
+- O jogador precisa ter saldo igual ou superior ao custo calculado.
+- Se o saldo for insuficiente, o abastecimento é recusado e combustível, saldo e contador de abastecimentos permanecem inalterados.
+- O saldo nunca pode ficar negativo.
 
 ## 3. Regras das entregas
 
@@ -52,7 +56,7 @@ Nesse caso, a partida termina sem ser considerada uma vitória, mesmo que já te
 
 ### Combustível insuficiente
 
-A falta de combustível não termina automaticamente a partida, porque o jogador pode abastecer gratuitamente.
+A falta de combustível não termina automaticamente a partida, porque o jogador pode abastecer se tiver saldo suficiente.
 
 A tentativa de entrega deve ser recusada e o jogador deve poder escolher outra ação.
 
@@ -76,6 +80,7 @@ O estado da partida deve conter, no mínimo:
 - `entregasRealizadas`: quantidade de entregas concluídas.
 - `combustivelGasto`: total de combustível consumido em entregas bem-sucedidas.
 - `abastecimentos`: número de operações de abastecimento efetuadas.
+- `dinheiro`: saldo disponível para pagar os abastecimentos e receber recompensas.
 - `ativo`: indica se a partida continua em execução.
 
 Os valores de configuração, como o combustível inicial, a capacidade máxima e o total de entregas, devem ficar centralizados num módulo de configuração.
@@ -146,7 +151,7 @@ package.json
 
 Os módulos devem comunicar através de funções com responsabilidades claras.
 
-- `config.js` disponibiliza os valores de configuração aos outros módulos.
+- `config.js` disponibiliza os valores de configuração aos outros módulos, incluindo o preço por unidade de combustível.
 - `deliveries.js` recebe ou consulta o estado necessário para validar uma entrega e devolve o resultado da operação.
 - `fuel.js` recebe os dados necessários para calcular um abastecimento e devolve o resultado e o novo combustível.
 - `statistics.js` consulta os dados da partida e disponibiliza estatísticas sem alterar o estado do jogo.
@@ -159,17 +164,18 @@ Os contratos concretos das funções e os seus parâmetros devem ser acordados p
 
 ## 9. Pontuação e economia
 
-A versão inicial não inclui pontuação nem dinheiro.
+O jogo possui um saldo em reais, iniciado em R$ 0,00.
 
-Estas funcionalidades são opcionais e só devem avançar depois de aprovadas pela equipa.
+### Recompensas por entrega
+- Cada entrega concluída com sucesso concede uma recompensa aleatória entre **R$ 20,00 e R$ 50,00**, inclusive.
+- O valor é creditado ao saldo somente depois que a entrega passa por todas as validações e é concluída.
+- Entregas recusadas ou falhadas não concedem recompensa e não alteram o saldo.
+- O saldo acumulado é apresentado durante a partida e no resumo final.
 
-Se forem aprovadas, a equipa deverá definir:
-- A recompensa por cada entrega.
-- A existência de bónus por conclusão.
-- O custo do combustível.
-- O comportamento quando o jogador não tiver dinheiro suficiente.
+### Bónus de conclusão
+Não há bónus adicional por concluir as cinco entregas nesta implementação, pois essa regra depende de aprovação específica da equipa.
 
-A introdução destas regras não deve alterar as condições fundamentais de vitória sem uma decisão explícita da equipa.
+A recompensa não altera as condições fundamentais de vitória. O saldo recebido pelas entregas pode ser utilizado para pagar os abastecimentos, ao custo de R$ 1,00 por unidade de combustível.
 
 ## 10. Critérios de qualidade
 

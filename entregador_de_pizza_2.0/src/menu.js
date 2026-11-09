@@ -36,6 +36,8 @@ Entregas: ${estado.entregasRealizadas}/${CONFIG.TOTAL_ENTREGAS}
 Combustível: ${estado.combustivel}/${CONFIG.COMBUSTIVEL_MAXIMO}
 Combustível gasto: ${estado.combustivelGasto}
 Abastecimentos: ${estado.abastecimentos}
+Saldo: R$ ${(Number(estado.dinheiro) || 0).toFixed(2)}
+Preço do combustível: R$ ${CONFIG.PRECO_COMBUSTIVEL_POR_UNIDADE.toFixed(2)} por unidade
 =================================
 [${CONFIG.OPCOES_MENU.ENTREGAR}] Entregar pizza
 [${CONFIG.OPCOES_MENU.ABASTECER}] Abastecer moto
@@ -75,6 +77,11 @@ export function formatarResultado(resultado) {
         linhas.push(resultado.mensagem);
     }
 
+    if (resultado.recompensa !== undefined && resultado.sucesso) {
+        linhas.push(`Recompensa recebida: R$ ${resultado.recompensa.toFixed(2)}`);
+        linhas.push(`Saldo atual: R$ ${resultado.saldo.toFixed(2)}`);
+    }
+
     if (resultado.gasto !== undefined) {
         if (resultado.sucesso) {
             linhas.push(`Combustível gasto: ${resultado.gasto}`);
@@ -87,6 +94,16 @@ export function formatarResultado(resultado) {
         linhas.push(`Combustível recuperado: ${resultado.recuperado}`);
     }
 
+    if (resultado.custo !== undefined && resultado.sucesso) {
+        linhas.push(`Custo do abastecimento: R$ ${resultado.custo.toFixed(2)}`);
+        linhas.push(`Saldo restante: R$ ${resultado.saldo.toFixed(2)}`);
+    }
+
+    if (resultado.custoNecessario !== undefined) {
+        linhas.push(`Valor necessário: R$ ${resultado.custoNecessario.toFixed(2)}`);
+        linhas.push(`Saldo disponível: R$ ${(resultado.saldo || 0).toFixed(2)}`);
+    }
+
     return linhas.join("\n");
 }
 
@@ -96,7 +113,8 @@ export function formatarResultado(resultado) {
 export function apresentarResultado(resultado) {
     const texto = formatarResultado(resultado);
     if (texto) {
-        console.log(`\n${texto}`);
+        console.log(`
+${texto}`);
     }
 }
 

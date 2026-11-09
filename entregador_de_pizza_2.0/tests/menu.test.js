@@ -180,10 +180,14 @@ test("apresentarResultado exibe o resultado formatado no terminal", () => {
             sucesso: true,
             mensagem: "Moto abastecida!",
             recuperado: 20,
+            custo: 20,
+            saldo: 5,
         });
         assert.equal(logs.length, 1);
         assert.ok(logs[0].includes("Moto abastecida!"));
         assert.ok(logs[0].includes("Combustível recuperado: 20"));
+        assert.ok(logs[0].includes("Custo do abastecimento: R$ 20.00"));
+        assert.ok(logs[0].includes("Saldo restante: R$ 5.00"));
     } finally {
         console.log = logOriginal;
     }

@@ -17,6 +17,7 @@ export function obterEstatisticas(estado = {}) {
     const totalEntregas = CONFIG.TOTAL_ENTREGAS;
     const combustivelGasto = Number(seguro.combustivelGasto) || 0;
     const abastecimentos = Number(seguro.abastecimentos) || 0;
+    const saldo = Number(seguro.dinheiro) || 0;
     const combustivelRestante = seguro.combustivel !== undefined ? seguro.combustivel : CONFIG.COMBUSTIVEL_INICIAL;
     const resultado = seguro.resultado || "em_andamento";
 
@@ -25,6 +26,7 @@ export function obterEstatisticas(estado = {}) {
         totalEntregas,
         combustivelGasto,
         abastecimentos,
+        saldo,
         combustivelRestante,
         resultado,
         vitoria: resultado === "vitoria",
@@ -49,6 +51,7 @@ export function formatarResumo(estado) {
         `Entregas: ${stats.entregasRealizadas}/${stats.totalEntregas}`,
         `Combustível gasto: ${stats.combustivelGasto}`,
         `Abastecimentos: ${stats.abastecimentos}`,
+        `Saldo final: R$ ${stats.saldo.toFixed(2)}`,
     ];
 
     if (stats.vitoria) {

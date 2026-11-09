@@ -11,6 +11,15 @@ export function sortearGasto() {
 }
 
 /**
+ * Sorteia a recompensa de uma entrega válida entre R$ 20 e R$ 50.
+ */
+export function sortearRecompensa() {
+    const minimo = CONFIG.RECOMPENSA_MINIMA;
+    const maximo = CONFIG.RECOMPENSA_MAXIMA;
+    return Math.floor(Math.random() * (maximo - minimo + 1)) + minimo;
+}
+
+/**
  * Tenta realizar uma entrega de pizza.
  *
  * Regras:
@@ -18,7 +27,7 @@ export function sortearGasto() {
  * - O objetivo não pode ter sido atingido.
  * - Deve haver combustível suficiente para o gasto sorteado.
  *
- * Devolve { sucesso, mensagem, gasto? }.
+ * Devolve { sucesso, mensagem, gasto?, recompensa?, saldo? }.
  * Nota: esta função NÃO verifica a condição de vitória — essa
  * responsabilidade é do módulo game.js (coordenador do fluxo).
  */
@@ -45,9 +54,15 @@ export function entregarPizza(estado) {
     estado.combustivelGasto += gasto;
     estado.entregasRealizadas++;
 
+    // A recompensa só é sorteada e creditada depois que a entrega é validada.
+    const recompensa = sortearRecompensa();
+    estado.dinheiro = (Number(estado.dinheiro) || 0) + recompensa;
+
     return {
         sucesso: true,
         mensagem: "Pizza entregue com sucesso!",
         gasto,
+        recompensa,
+        saldo: estado.dinheiro,
     };
 }
