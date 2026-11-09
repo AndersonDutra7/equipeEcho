@@ -75,6 +75,11 @@ export function formatarResultado(resultado) {
         linhas.push(resultado.mensagem);
     }
 
+    if (resultado.recompensa !== undefined && resultado.sucesso) {
+        linhas.push(`Recompensa recebida: R$ ${resultado.recompensa.toFixed(2)}`);
+        linhas.push(`Saldo atual: R$ ${resultado.saldo.toFixed(2)}`);
+    }
+
     if (resultado.gasto !== undefined) {
         if (resultado.sucesso) {
             linhas.push(`Combustível gasto: ${resultado.gasto}`);
@@ -96,7 +101,8 @@ export function formatarResultado(resultado) {
 export function apresentarResultado(resultado) {
     const texto = formatarResultado(resultado);
     if (texto) {
-        console.log(`\n${texto}`);
+        console.log(`
+${texto}`);
     }
 }
 

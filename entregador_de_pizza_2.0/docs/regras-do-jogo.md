@@ -159,17 +159,18 @@ Os contratos concretos das funções e os seus parâmetros devem ser acordados p
 
 ## 9. Pontuação e economia
 
-A versão inicial não inclui pontuação nem dinheiro.
+O jogo possui um saldo em reais, iniciado em R$ 0,00.
 
-Estas funcionalidades são opcionais e só devem avançar depois de aprovadas pela equipa.
+### Recompensas por entrega
+- Cada entrega concluída com sucesso concede uma recompensa aleatória entre **R$ 20,00 e R$ 50,00**, inclusive.
+- O valor é creditado ao saldo somente depois que a entrega passa por todas as validações e é concluída.
+- Entregas recusadas ou falhadas não concedem recompensa e não alteram o saldo.
+- O saldo acumulado é apresentado durante a partida e no resumo final.
 
-Se forem aprovadas, a equipa deverá definir:
-- A recompensa por cada entrega.
-- A existência de bónus por conclusão.
-- O custo do combustível.
-- O comportamento quando o jogador não tiver dinheiro suficiente.
+### Bónus de conclusão
+Não há bónus adicional por concluir as cinco entregas nesta implementação, pois essa regra depende de aprovação específica da equipa.
 
-A introdução destas regras não deve alterar as condições fundamentais de vitória sem uma decisão explícita da equipa.
+A recompensa não altera as condições fundamentais de vitória. O abastecimento continua seguindo a regra já documentada, sem custo em dinheiro.
 
 ## 10. Critérios de qualidade
 

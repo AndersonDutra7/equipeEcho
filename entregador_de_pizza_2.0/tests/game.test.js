@@ -121,6 +121,7 @@ describe("Testes do Fluxo de Jogo e Condições de Encerramento", () => {
                 assert.equal(estado.ativo, false);
                 assert.equal(estado.resultado, "vitoria");
                 assert.equal(estado.entregasRealizadas, CONFIG.TOTAL_ENTREGAS);
+                assert.equal(estado.dinheiro, 100); // 5 entregas x R$ 20
             });
         });
 
