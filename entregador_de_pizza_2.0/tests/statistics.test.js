@@ -20,6 +20,7 @@ test("obterEstatisticas extrai corretamente os contadores do estado", () => {
     estado.entregasRealizadas = 3;
     estado.combustivelGasto = 50;
     estado.abastecimentos = 2;
+    estado.dinheiro = 35;
     estado.combustivel = 70;
     estado.resultado = "em_andamento";
 
@@ -29,6 +30,7 @@ test("obterEstatisticas extrai corretamente os contadores do estado", () => {
     assert.equal(stats.totalEntregas, CONFIG.TOTAL_ENTREGAS);
     assert.equal(stats.combustivelGasto, 50);
     assert.equal(stats.abastecimentos, 2);
+    assert.equal(stats.saldo, 35);
     assert.equal(stats.combustivelRestante, 70);
     assert.equal(stats.resultado, "em_andamento");
     assert.equal(stats.vitoria, false);
