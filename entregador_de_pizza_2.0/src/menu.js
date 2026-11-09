@@ -1,11 +1,13 @@
 import rl from "readline-sync";
 import { CONFIG } from "./config.js";
-import {
-    entregarPizza,
-    encerrarPartida,
-} from "./game.js";
-import { abastecerMoto } from "./fuel.js";
 
+// ---------------------------------------------------------------------------
+// Interface com o utilizador (apenas I/O — sem lógica de negócio)
+// ---------------------------------------------------------------------------
+
+/**
+ * Apresenta o estado atual da partida e as opções do menu.
+ */
 export function mostrarStatus(estado) {
     console.log(`
 =================================
@@ -22,7 +24,17 @@ Abastecimentos: ${estado.abastecimentos}
 =================================`);
 }
 
-function apresentarResultado(resultado) {
+/**
+ * Lê a opção do jogador no terminal.
+ */
+export function lerOpcao() {
+    return rl.question("Opção: ").trim();
+}
+
+/**
+ * Apresenta o resultado de uma ação (entrega, abastecimento, etc.).
+ */
+export function apresentarResultado(resultado) {
     console.log(`\n${resultado.mensagem}`);
 
     if (resultado.gasto !== undefined) {
@@ -34,31 +46,10 @@ function apresentarResultado(resultado) {
     }
 }
 
-export function executarMenu(estado) {
-    while (estado.ativo) {
-        mostrarStatus(estado);
-
-        const opcao = rl.question("Opção: ").trim();
-
-        switch (opcao) {
-            case CONFIG.OPCOES_MENU.ENTREGAR:
-                apresentarResultado(entregarPizza(estado));
-                break;
-
-            case CONFIG.OPCOES_MENU.ABASTECER:
-                apresentarResultado(abastecerMoto(estado));
-                break;
-
-            case CONFIG.OPCOES_MENU.SAIR:
-                encerrarPartida(estado);
-                console.log("\nJogo encerrado.");
-                break;
-
-            default:
-                console.log("\nOpção inválida. Escolhe 1, 2 ou 3.");
-        }
-    }
-
+/**
+ * Apresenta o resumo final da partida.
+ */
+export function mostrarResumo(estado) {
     console.log("\n========== RESUMO FINAL ==========");
     console.log(
         `Entregas: ${estado.entregasRealizadas}/${CONFIG.TOTAL_ENTREGAS}`
