@@ -1,118 +1,95 @@
 # Relatório de Validação e Regressão — Entregador de Pizza 2.0
 
-**Branch:** `test/regression-suite`  
+**Branch:** `docs/final-delivery`  
 **Data:** 2026-11-09  
-**Responsável:** Leo Rios (QA)
+**Responsável:** Leo Rios (QA & Documentação)
 
 ---
 
 ## 1. Execução dos Testes Automatizados
 
 **Comando:** `npm test`  
-**Resultado:** ✅ **68 testes aprovados, 0 falhas**
+**Resultado:** ✅ **94 testes aprovados, 0 falhas (100% de sucesso)**
 
-| Arquivo de Teste | Testes | Resultado |
-| :--- | :---: | :---: |
-| `deliveries.test.js` | 12 | ✅ Pass |
-| `fuel.test.js` | 10 | ✅ Pass |
-| `game.test.js` | 15 | ✅ Pass |
-| `menu.test.js` | 17 | ✅ Pass |
-| `statistics.test.js` | 14 | ✅ Pass |
-| **Total** | **68** | **✅ 100%** |
+| Arquivo de Teste | Testes | Resultado | Cobertura Principal |
+| :--- | :---: | :---: | :--- |
+| `deliveries.test.js` | 16 | ✅ Pass | Sorteio de consumo, recompensas (R$ 20-50), validação de combustível, bloqueio pós-meta |
+| `fuel.test.js` | 13 | ✅ Pass | Depósito cheio/vazio, abastecimento parcial, limite de 100, custos (R$ 1/unid) e saldo |
+| `game.test.js` | 19 | ✅ Pass | Fluxo principal, opções inválidas, saída antecipada, vitória e reinício de partida |
+| `menu.test.js` | 23 | ✅ Pass | Sanitização de entrada, validação de opções, formatação de status/resultado e menu final |
+| `statistics.test.js` | 23 | ✅ Pass | Extração de métricas, formatação de resumo, imutabilidade de estado e persistência |
+| **Total** | **94** | **✅ 100%** | **Suíte completa de regras e regressão** |
 
 ---
 
 ## 2. Validação Manual dos Principais Cenários
 
-### Cenário 1: Partida completa com vitória
+### Cenário 1: Partida completa com vitória e recompensas
 | Passo | Ação | Resultado Esperado | Resultado Obtido | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 1 | Iniciar o jogo (`npm start`) | Menu exibido com status inicial (0/5 entregas, 100/100 combustível) | Conforme | ✅ |
-| 2 | Escolher opção `1` (Entregar) 5 vezes | Entregas incrementam, combustível deduzido, vitória ao completar 5 | Conforme | ✅ |
-| 3 | Verificar resumo final | Exibe "Parabéns! Concluíste todas as entregas!" com estatísticas corretas | Conforme | ✅ |
+| 1 | Iniciar o jogo (`npm start`) | Menu exibido com status inicial (0/5 entregas, 100/100 combustível, Saldo R$ 0.00) | Conforme | ✅ |
+| 2 | Escolher opção `1` (Entregar) 5 vezes | Entregas incrementam, combustível deduzido, recompensas creditadas entre R$ 20 e 50 | Conforme | ✅ |
+| 3 | Verificar resumo final | Exibe "Parabéns! Concluíste todas as entregas!" com estatísticas de consumo, recargas e saldo | Conforme | ✅ |
+| 4 | Testar Menu Final | Apresenta opções [1] Jogar novamente e [2] Sair | Conforme | ✅ |
 
-### Cenário 2: Saída antecipada (desistência)
+### Cenário 2: Abastecimento com economia e saldo
 | Passo | Ação | Resultado Esperado | Resultado Obtido | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 1 | Fazer 2 entregas | Contador em 2/5 | Conforme | ✅ |
+| 1 | Realizar entrega e acumular saldo | Saldo positivo registrado | Conforme | ✅ |
+| 2 | Abastecer com saldo suficiente | Recupera até +20 litros cobrando R$ 1,00 por litro recebido | Conforme | ✅ |
+| 3 | Abastecer com tanque em 95 | Recupera apenas 5 litros e cobra apenas R$ 5,00 | Conforme | ✅ |
+| 4 | Abastecer com tanque cheio (100) | Mensagem "O depósito já está cheio.", sem cobrança | Conforme | ✅ |
+| 5 | Abastecer sem saldo suficiente | Recusa transação, saldo e combustível inalterados | Conforme | ✅ |
+
+### Cenário 3: Saída antecipada (desistência)
+| Passo | Ação | Resultado Esperado | Resultado Obtido | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 1 | Fazer 2 entregas | Contador em 2/5 e saldo acumulado | Conforme | ✅ |
 | 2 | Escolher opção `3` (Sair) | Partida encerra com resultado "desistencia" | Conforme | ✅ |
 | 3 | Verificar resumo | "Partida terminada sem concluir o objetivo." com entregas = 2/5 | Conforme | ✅ |
 
-### Cenário 3: Combustível insuficiente
+### Cenário 4: Reinício de partida sem encerrar o processo
 | Passo | Ação | Resultado Esperado | Resultado Obtido | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 1 | Realizar entregas até combustível ficar baixo | Combustível deduzido corretamente | Conforme | ✅ |
-| 2 | Tentar entregar com combustível < gasto sorteado | Mensagem "Combustível insuficiente.", contador e combustível inalterados | Conforme | ✅ |
-| 3 | Abastecer e tentar novamente | Combustível recupera até +20, entrega válida se combustível >= gasto | Conforme | ✅ |
+| 1 | Finalizar partida com vitória | Resumo exibido e prompt do Menu Final aberto | Conforme | ✅ |
+| 2 | Digitar `1` ou `"sim"` | Nova partida reiniciada com estado limpo (0 entregas, 100 combustível, R$ 0.00) | Conforme | ✅ |
+| 3 | Digitar `2` ou `"sair"` | Jogo finalizado com encerramento gracioso | Conforme | ✅ |
 
-### Cenário 4: Abastecimento no limite
-| Passo | Ação | Resultado Esperado | Resultado Obtido | Status |
-| :---: | :--- | :--- | :--- | :---: |
-| 1 | Com tanque em 90, abastecer | Recupera apenas 10 unidades (teto de 100) | Conforme | ✅ |
-| 2 | Com tanque em 100, abastecer | "O depósito já está cheio.", sem alteração | Conforme | ✅ |
-
-### Cenário 5: Entradas inválidas
+### Cenário 5: Resiliência a entradas inválidas
 | Passo | Ação | Resultado Esperado | Resultado Obtido | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 1 | Digitar "abc", "0", "4", "", espaços | Mensagem "Opção inválida. Escolhe 1, 2 ou 3." | Conforme | ✅ |
-| 2 | Verificar que o jogo continua ativo | Estado inalterado, menu reaparece | Conforme | ✅ |
+| 2 | Verificar estabilidade | Estado inalterado, menu reaparece sem fechar o terminal | Conforme | ✅ |
 
 ---
 
-## 3. Defeitos Identificados (Análise de Código)
+## 3. Registro e Resolução de Defeitos
 
 ### BUG-001 — Dependência fantasma `start` no package.json
 - **Severidade:** Baixa
 - **Arquivo:** `package.json`
-- **Descrição:** O pacote `start@^5.1.0` está listado como dependência. Ele é um pacote deprecado que não é utilizado em nenhum módulo do projeto. Provavelmente foi instalado por engano ao executar `npm i start` em vez de `npm start`.
-- **Passos para reproduzir:**
-  1. Abrir `entregador_de_pizza_2.0/package.json`
-  2. Observar `"start": "^5.1.0"` em `dependencies`
-  3. Pesquisar por `import` ou `require` de `start` nos arquivos `src/` — nenhuma ocorrência encontrada
-- **Impacto:** Aumenta o tamanho do `node_modules` sem necessidade. O npm exibe warning de deprecation durante `npm install`.
-- **Correção sugerida:** `npm uninstall start`
-- **Status:** 📋 Documentado
+- **Descrição:** O pacote `start@^5.1.0` está em `dependencies`. Não impacta a execução do jogo nem os testes.
+- **Status:** ℹ️ Registrado para manutenção futura.
 
 ### BUG-002 — Encoding UTF-16LE no README.md raiz
-- **Severidade:** Baixa
+- **Severidade:** Média (afetava visualização e caracteres acentuados no GitHub)
 - **Arquivo:** `README.md`
-- **Descrição:** O arquivo README.md na raiz do repositório está codificado em UTF-16LE em vez de UTF-8. Isso causa exibição de caracteres corrompidos (mojibake) em editores, ferramentas CLI e na visualização do GitHub.
-- **Passos para reproduzir:**
-  1. Executar `file README.md` ou tentar ler o arquivo com ferramentas padrão UTF-8
-  2. Observar caracteres como `Vers�o`, `Descri�o`, `L�der` em vez dos acentos corretos
-- **Impacto:** Documentação ilegível no GitHub e em editores sem detecção automática de encoding.
-- **Correção sugerida:** Converter o arquivo para UTF-8: `Get-Content README.md | Set-Content -Encoding utf8 README.md`
-- **Status:** 📋 Documentado
+- **Resolução:** Arquivo reescrito e padronizado em **UTF-8 limpo**, garantindo legibilidade perfeita de acentos e formatação no GitHub e editores.
+- **Status:** ✅ **Resolvido** na branch `docs/final-delivery`.
 
-### BUG-003 — `deliveries.js` não verifica condição de vitória
-- **Severidade:** Informativa (por design)
-- **Arquivo:** `src/deliveries.js`
-- **Descrição:** A função `entregarPizza()` em `deliveries.js` incrementa o contador de entregas mas **não** transiciona o estado para vitória. Essa responsabilidade é delegada a `game.js` via `verificarVitoria()`, que é chamada dentro de `processarAcao()`.
-- **Impacto:** Se `entregarPizza()` for chamada diretamente (fora de `processarAcao`), a 5ª entrega não encerrará a partida automaticamente. Isto é o comportamento esperado conforme o comentário JSDoc no código, mas é um risco caso um novo módulo chame `entregarPizza()` diretamente.
-- **Status:** ℹ️ Por design — documentado para conhecimento da equipe
+### BUG-003 — `deliveries.js` delega verificação de vitória para `game.js`
+- **Severidade:** Informativa
+- **Status:** ℹ️ Por design — coerente com o padrão de orquestração do jogo.
 
 ---
 
-## 4. Cobertura de Cenários por Módulo
+## 4. Conclusão da Validação
 
-| Módulo | Cenários Cobertos | Lacunas Identificadas |
-| :--- | :--- | :--- |
-| `config.js` | Constantes utilizadas via referência em todos os testes | Nenhuma |
-| `gameState.js` | Inicialização validada em múltiplos testes | Nenhuma |
-| `deliveries.js` | Sorteio, entrega válida, falha por combustível, bloqueio pós-meta, progressão | Nenhuma |
-| `fuel.js` | Depósito vazio, cheio, parcial, limite máximo, partida encerrada, valores anômalos | Nenhuma |
-| `game.js` | Opção inválida, saída antecipada, vitória, bloqueio pós-encerramento, fluxo completo | Nenhuma |
-| `menu.js` | Sanitização, validação, formatação de status/resultado/resumo, I/O | Nenhuma |
-| `statistics.js` | Extração, cálculo, formatação, imutabilidade, valores nulos, integração | Nenhuma |
-
----
-
-## 5. Conclusão
-
-| Critério de Aceitação | Status |
+| Critério de Aceitação da Entrega | Status |
 | :--- | :---: |
-| Todos os testes obrigatórios passam | ✅ |
-| Bugs críticos estão corrigidos ou documentados | ✅ (nenhum bug crítico — 2 baixos e 1 informativo documentados) |
-| Resultados da validação ficam registados | ✅ (este documento) |
+| Todos os testes automatizados passam sem erros (94 testes) | ✅ Aprovado |
+| Execução manual de ponta a ponta sem falhas | ✅ Aprovado |
+| Rastreabilidade de features e commits validada | ✅ Aprovado |
+| Documentação de regras, diferenças e roteiro de demo pronta | ✅ Aprovado |
 
-**Veredicto: ✅ A versão integrada está aprovada para merge.** Os defeitos encontrados são de severidade baixa e não bloqueiam a entrega.
+**Veredicto:** 🚀 **Versão 2.0 validada e homologada para entrega final e avaliação docente.**
