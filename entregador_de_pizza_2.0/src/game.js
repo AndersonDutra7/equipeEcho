@@ -1,5 +1,5 @@
 import { CONFIG } from "./config.js";
-import { criarEstadoInicial } from "./gameState.js";
+import { criarEstadoInicial, reiniciarPartida } from "./gameState.js";
 import { entregarPizza } from "./deliveries.js";
 import { abastecerMoto } from "./fuel.js";
 import {
@@ -7,6 +7,9 @@ import {
     lerOpcao,
     apresentarResultado,
     sanitizarEntrada,
+    mostrarMenuFinal,
+    solicitarConfirmacaoReiniciar,
+    perguntarReiniciar,
 } from "./menu.js";
 import { mostrarResumo } from "./statistics.js";
 
@@ -85,18 +88,40 @@ export function processarAcao(estado, opcao) {
  */
 export function iniciarPartida(leitor = lerOpcao) {
     const estado = criarEstadoInicial();
+    let continuarJogando = true;
 
-    while (estado.ativo) {
-        mostrarStatus(estado);
+    while (continuarJogando) {
+        while (estado.ativo) {
+            mostrarStatus(estado);
 
-        const opcao = leitor();
-        const resultado = processarAcao(estado, opcao);
+            const opcao = leitor();
+            const resultado = processarAcao(estado, opcao);
 
-        if (resultado) {
-            apresentarResultado(resultado);
+            if (resultado) {
+                apresentarResultado(resultado);
+            }
+        }
+
+        mostrarResumo(estado);
+
+        if (estado.resultado === "vitoria") {
+            const querReiniciar = solicitarConfirmacaoReiniciar(leitor);
+            if (querReiniciar) {
+                reiniciarPartida(estado);
+            } else {
+                continuarJogando = false;
+            }
+        } else {
+            continuarJogando = false;
         }
     }
 
-    mostrarResumo(estado);
     return estado;
 }
+
+export {
+    reiniciarPartida,
+    mostrarMenuFinal,
+    solicitarConfirmacaoReiniciar,
+    perguntarReiniciar,
+};

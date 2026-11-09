@@ -16,4 +16,9 @@ export const CONFIG = Object.freeze({
         ABASTECER: "2",
         SAIR: "3",
     }),
+
+    OPCOES_MENU_FINAL: Object.freeze({
+        REINICIAR: "1",
+        SAIR: "2",
+    }),
 });
